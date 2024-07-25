@@ -25,7 +25,6 @@ To gain a more profound insight into payment behavior, we conducted a comparativ
 
 ![image](https://github.com/user-attachments/assets/7aec558c-a4bb-4526-940c-9d2db050e550)
 
-![image](https://github.com/user-attachments/assets/aef39514-b83b-4cc9-bc77-f7c88913f99e)
 Bivariate Data Analysis: To investigate the correlation between two variables, we employed Tableau to gain valuable insights. Our approach involved the examination of various X variables while applying filters against the target variable, denoted as "Default." The outcomes were numeric, with 1 denoting instances of customer credit defaults (represented in dark blue), and 0 indicating no defaults (illustrated in light blue). In our scrutiny of the distribution of defaults versus no defaults within the Age category, we discerned a descending trend. Nevertheless, the pinnacle for accounts with no defaults at age 29 did not precisely mirror the behavior observed in defaulted accounts. Age displayed a pattern where both default and no default accounts diminished as age advanced. Conversely, the Education category exhibited a similar trend, with both default and no default accounts showcasing a decrease following the peak observed for undergraduate students.
 
 ![image](https://github.com/user-attachments/assets/8b209d45-fabd-4cf8-b157-4814b92f6776)
@@ -38,6 +37,11 @@ In the initial month, we noted defaults happening for lower amounts, specificall
 ![image](https://github.com/user-attachments/assets/03139255-b5a0-4bd0-8722-bd7e06972d21)
 
 Through the analysis of both bivariate and univariate data, we have successfully identified patterns and correlations among categorical and numerical variables. These insights will serve as a foundation for our upcoming MVP (Minimum Viable Product) model, which will validate our initial findings and guide us in the development of more advanced models through feature engineering.
+
+## MVP Model (Pre-Feature Engineering):
+Following the data exploration phase, our primary goal was to assess the models without any feature engineering to establish baseline performance metrics. Before running the four models listed below, we transformed variables such as "SEX," "EDUCATION," "MARRIAGE," and all "PAY_1" through "PAY_6" into categorical variables. Subsequently, we executed the models, and the results are presented as follows. Notably, the GBM (Gradient Boosting Machine) model achieved the highest Area Under the Curve (AUC) at 0.7873 (78.7%). These baseline results will serve as a robust point of comparison as we move forward to incorporate pertinent features into our models.
+MVP Model Summary:
+![image](https://github.com/user-attachments/assets/757b56fc-02c5-4dfe-81e6-bfcdf152eba5)
 
 
 ## Feature Engineering
@@ -56,10 +60,18 @@ Feature creation is a key differentiator for our model, enhancing its predictive
 5. Average Payment Amount (PAY_AMT_AVG): Computing the mean of payment amounts to summarize repayment performance.
 6. Payment Trend (PAY_TREND): Assessing trends in payment behavior over time.
 7. Bill Percentage Paid (BILL_PCT_PAID2 to BILL_PCT_PAID6): Indicating the percentage of the bill from the next month that was paid in the previous month.
-8. Additional granular variables provide deeper insights into customer payment habits:
+
+   ![image](https://github.com/user-attachments/assets/b1a34e4a-45a7-413e-bd89-ebafb16a7bcf)
+   ![image](https://github.com/user-attachments/assets/e2c197d2-5cf6-4051-969e-45105f2705d9)
+
+
+9. Additional granular variables provide deeper insights into customer payment habits:
 
 No Payment Needed to 8 Months Payment Delay (COUNT_PAY_MINUS_2 to COUNT_PAY_8): Counting specific payment behaviors over six months.
 Credit Utilization Ratios (CREDIT_UTILIZATION1 to CREDIT_UTILIZATION6): Gauging how effectively customers utilize their credit limit.
+
+![image](https://github.com/user-attachments/assets/035e19dc-9f0e-40c7-8bf7-5c383a6daa75)
+
 
 - Variable Transformation
 Enhancements and transformations improve feature suitability:
@@ -68,6 +80,45 @@ Enhancements and transformations improve feature suitability:
 Pay Category Squared: Capturing nonlinear patterns in payment behavior.
 - Categorical Encoding
 Adjustments align data types with business and technical requirements, ensuring effective modeling. Dummy variables were generated for all categorical variables, expanding the dataset to 135 variables, enhancing model insights and predictive power.
+
+## Model Building and Assessment
+
+Profit: Profit represents the projected profit of a sample of 1000 loans. It takes into account the proportion of true negatives and false negatives, as these individuals would be approved for a loan. The calculation involves multiplying these proportions by the respective revenue or loss associated with their actual default outcome.
+Profit=(𝑇𝑁𝑇𝑃+𝑇𝑁+𝐹𝑃+𝐹𝑁×1000×$1500)−(𝐹𝑁𝑇𝑃+𝑇𝑁+𝐹𝑃+𝐹𝑁×1000 ×$5000)
+
+Determining the Class Threshold
+As the classification models predict a probability value, we must determine the threshold at which we will consider a prediction “positive” (predicted value of 1, in this case indicating a prediction that the individual will default). For the purpose of this analysis, we considered the cost-benefit of an incorrect prediction. A false positive, in which we predict that the individual will default and in fact doesn’t cost us $1500 in lost revenue. A false negative in which we predict that the individual will not default and in fact will, cost us $5000 in unpaid loans. Leveraging these two costs, we calculated the critical fractile. 1500/(1500+5000)=0.23076923
+Contrasting this value with the proportion of one’s in the dataset, we observe that this value is slightly (~1%) higher. This value will serve as our initial threshold value during model selection. We will then validate this in our final model by recalculating our success metrics across various thresholds.
+
+Model Selection
+The models in scope for this analysis are Logistic Regression, Random Forest, and Gradient Boosting Machine. Due to high train time and complexity, we did not explore Support Vector Machines or Neural Networks.
+1. Logistic Regression
+The logit model yields an intuitive and easy to understand set of coefficients to determine feature importance. The initial train/test split yielded an ROC-AUC of 0.785 with a calculated profit score of $519,062. Through recursive feature elimination, the top 20 features were selected and fit to a second logit model yielding and ROC-AUC of 0.766 and profit score of $503,645. Both a reduction from the initial fitted model with all X variables present.
+![image](https://github.com/user-attachments/assets/783ebc88-e3e8-4fb3-84cc-e7b9a23b87e2)
+
+2. Random Forest
+Random Forests are an ensemble classifier that leverages many decision trees constructed in parallel, which then “vote” on the classification outcome. To determine the optimal hyper parameters for our random forest model we conducted a five-fold cross validation for 6 different values of estimators (trees) from 100 to 600 trees in steps of 100 through grid search. This resulted in an optimized model with 200 trees yielding and ROC-AUC of 0.7767 and a profit score of $511,458.
+![image](https://github.com/user-attachments/assets/85e1371f-6bcd-4a23-9302-81d0fae1bc88)
+
+3. Gradient Boosting Machine
+Gradient Boosting Machine models are another ensemble classifier that leverage trees. However, unlike a Random Forest, the trees are constructed sequentially and place a higher “weight” on data points not well explained by prior trees. In addition to the number of trees, we also examined several learning rates for our 5 fold cross validation through grid search. The hyper-parameters tested were: # 𝑜𝑓 𝑡𝑟𝑒𝑒𝑠∶ [100,150,200,250,300,350,400,500,600] 𝑙𝑒𝑎𝑟𝑛𝑖𝑛𝑔 𝑟𝑎𝑡𝑒: [0.01,0.1,0.15]
+The resulting optimized parameters for this model were 150 trees and 0.1 (10%) learning rate. This produced an ROC-AUC of 0.7915 and a profit score of $543,229.
+
+![image](https://github.com/user-attachments/assets/d4b959b8-8a51-4c00-910a-663563de15c7)
+
+## Model Selection:
+Certainly, a comparative study of model performance is essential to select the best-performing model. Please provide the performance summary table, and I'll be happy to assist you with the analysis and model selection based on the provided metrics.
+![image](https://github.com/user-attachments/assets/0ce3433d-6ee8-4d16-8103-2b6b4ab9e112)
+
+Validating Class Threshold
+Finally, in assessing that we have selected the optimal threshold to maximize our primary scoring metric (profit), we calculated the profit across various thresholds using our final model. This confirmed that the threshold that yields the highest profit is the previously calculated value of 0.23076923.
+![image](https://github.com/user-attachments/assets/9f26ba3f-a940-4d94-b885-87cea57b8cac)
+
+
+
+
+
+
 
 
 
