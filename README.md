@@ -74,12 +74,17 @@ Credit Utilization Ratios (CREDIT_UTILIZATION1 to CREDIT_UTILIZATION6): Gauging 
 
 
 #### Variable Transformation
-Enhancements and transformations improve feature suitability:
+The enhancements made to certain existing variables, along with the introduction of additional transformations, are instrumental in enriching our feature set and boosting the predictive value of our model. Here's an overview of these transformations:
+- Logarithm of Payment Amounts (LOG_PAY_AMT1 to LOG_PAY_AMT6, LOG_LIMIT_BAL, LOG_TTL_PYMT, and LOG_TTL_BILL): The logarithmic transformation of payment amounts, credit limits, total payments, and total bills serves multiple purposes. It aids in normalizing the data, mitigating issues related to heteroscedasticity, and bringing out patterns that might not be discernible in the original scale. This transformation enhances the interpretability of these variables and can improve their suitability for modeling.
+- Pay Category Squared (PAY_1_SQR to PAY_6_SQR): Squaring the existing payment categories (PAY_1 to PAY_6) provides a unique perspective on the magnitude of payment delays. Higher values in these squared variables indicate more significant delays, allowing us to identify extreme cases and gain a deeper understanding of the severity of payment issues. This transformation adds a nonlinear dimension to these variables, potentially capturing nuanced patterns in payment behavior.
+![image](https://github.com/user-attachments/assets/3d300c11-3aac-4705-9eb6-59dd75795afb)
 
-#### Logarithm of Payment Amounts: Normalizing data and mitigating heteroscedasticity issues.
-Pay Category Squared: Capturing nonlinear patterns in payment behavior.
+These transformations collectively contribute to a more comprehensive and nuanced feature set, enabling our model to capture intricate relationships and patterns in the data, ultimately enhancing its predictive power and accuracy in assessing credit risk and predicting defaults.
+
 #### Categorical Encoding
-Adjustments align data types with business and technical requirements, ensuring effective modeling. Dummy variables were generated for all categorical variables, expanding the dataset to 135 variables, enhancing model insights and predictive power.
+The final stage of our feature engineering process focuses on aligning data types with both business requirements and technical considerations. Out of the 75 variables obtained after the initial feature engineering steps, only 9 of them deviate from the desired data types. These variables are shown in the following screenshot. Despite being numerical in nature, we have chosen to represent certain variables as categories or labels rather than numerical values, aligning them with the specific context and relevance they hold within our modeling framework.
+
+![image](https://github.com/user-attachments/assets/aefa019e-9251-47af-897d-2363a9ddd426)
 
 ## Model Building and Assessment
 
@@ -114,6 +119,7 @@ The resulting optimized parameters for this model were 150 trees and 0.1 (10%) l
 
 ## Model Selection:
 Certainly, a comparative study of model performance is essential to select the best-performing model. Please provide the performance summary table, and I'll be happy to assist you with the analysis and model selection based on the provided metrics.
+
 ![image](https://github.com/user-attachments/assets/0ce3433d-6ee8-4d16-8103-2b6b4ab9e112)
 
 - Validating Class Threshold
