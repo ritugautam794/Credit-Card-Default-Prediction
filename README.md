@@ -4,7 +4,7 @@ This project aims to build a machine learning model to predict the likelihood of
 ## Executive Summary
 This report presents an analysis of credit issuance within the financial sector, using a dataset of 24,000 clients and an additional 1,000 pilot customers. The objectives include making credit issuance recommendations, assessing the impact of gender on decision-making, and discussing broader implications for ethics and equality in artificial intelligence-driven decisions.
 
-In the first section, we develop a predictive model to recommend credit issuance for the 1,000 pilot customers, based on existing client data. The second section explores the role of gender by comparing models with and without the "SEX" variable. We observe differences in credit issuance outcomes when applying models to male and female applicants separately. A graphical representation depicts the percentage of males and females receiving credit across various threshold values. Lastly, we delve into the ethical implications of data-driven decision-making. We emphasize the importance of responsible AI practices and compliance with relevant regulations to ensure fairness and ethical considerations. Recommendations include ongoing monitoring, transparency, and collaboration with stakeholders to align practices with anti-discrimination legislation and ethical standards.
+Firstly, we develop a predictive model to recommend credit issuance for the 1,000 pilot customers, based on existing client data. Lastly, we delve into the ethical implications of data-driven decision-making. We emphasize the importance of responsible AI practices and compliance with relevant regulations to ensure fairness and ethical considerations. Recommendations include ongoing monitoring, transparency, and collaboration with stakeholders to align practices with anti-discrimination legislation and ethical standards.
 
 This report underscores the need for a balance between profitability and ethical decision-making in financial services. Responsible AI practices and continuous evaluation of models are essential to maintain fairness, trust, and equality in credit issuance decisions. 
 
@@ -84,23 +84,29 @@ Adjustments align data types with business and technical requirements, ensuring 
 ## Model Building and Assessment
 
 Profit: Profit represents the projected profit of a sample of 1000 loans. It takes into account the proportion of true negatives and false negatives, as these individuals would be approved for a loan. The calculation involves multiplying these proportions by the respective revenue or loss associated with their actual default outcome.
-Profit=(𝑇𝑁𝑇𝑃+𝑇𝑁+𝐹𝑃+𝐹𝑁×1000×$1500)−(𝐹𝑁𝑇𝑃+𝑇𝑁+𝐹𝑃+𝐹𝑁×1000 ×$5000)
+Profit=((𝑇𝑁/(𝑇𝑃+𝑇𝑁+𝐹𝑃+𝐹𝑁))×1000×$1500)−((𝐹𝑁/(𝑇𝑃+𝑇𝑁+𝐹𝑃+𝐹𝑁))×1000 ×$5000)
 
-Determining the Class Threshold
-As the classification models predict a probability value, we must determine the threshold at which we will consider a prediction “positive” (predicted value of 1, in this case indicating a prediction that the individual will default). For the purpose of this analysis, we considered the cost-benefit of an incorrect prediction. A false positive, in which we predict that the individual will default and in fact doesn’t cost us $1500 in lost revenue. A false negative in which we predict that the individual will not default and in fact will, cost us $5000 in unpaid loans. Leveraging these two costs, we calculated the critical fractile. 1500/(1500+5000)=0.23076923
+### Determining the Class Threshold
+
+As the classification models predict a probability value, we must determine the threshold at which we will consider a prediction “positive” (predicted value of 1, in this case indicating a prediction that the individual will default). For the purpose of this analysis, we considered the cost-benefit of an incorrect prediction. A false positive, in which we predict that the individual will default and in fact doesn’t cost us $1500 in lost revenue. A false negative in which we predict that the individual will not default and in fact will, cost us $5000 in unpaid loans. Leveraging these two costs, we calculated the critical fractile.
+
+1500/(1500+5000)=0.23076923
+
 Contrasting this value with the proportion of one’s in the dataset, we observe that this value is slightly (~1%) higher. This value will serve as our initial threshold value during model selection. We will then validate this in our final model by recalculating our success metrics across various thresholds.
 
-Model Selection
+## Model Selection
 The models in scope for this analysis are Logistic Regression, Random Forest, and Gradient Boosting Machine. Due to high train time and complexity, we did not explore Support Vector Machines or Neural Networks.
 1. Logistic Regression
 The logit model yields an intuitive and easy to understand set of coefficients to determine feature importance. The initial train/test split yielded an ROC-AUC of 0.785 with a calculated profit score of $519,062. Through recursive feature elimination, the top 20 features were selected and fit to a second logit model yielding and ROC-AUC of 0.766 and profit score of $503,645. Both a reduction from the initial fitted model with all X variables present.
+
 ![image](https://github.com/user-attachments/assets/783ebc88-e3e8-4fb3-84cc-e7b9a23b87e2)
 
-2. Random Forest
+3. Random Forest
 Random Forests are an ensemble classifier that leverages many decision trees constructed in parallel, which then “vote” on the classification outcome. To determine the optimal hyper parameters for our random forest model we conducted a five-fold cross validation for 6 different values of estimators (trees) from 100 to 600 trees in steps of 100 through grid search. This resulted in an optimized model with 200 trees yielding and ROC-AUC of 0.7767 and a profit score of $511,458.
+
 ![image](https://github.com/user-attachments/assets/85e1371f-6bcd-4a23-9302-81d0fae1bc88)
 
-3. Gradient Boosting Machine
+5. Gradient Boosting Machine
 Gradient Boosting Machine models are another ensemble classifier that leverage trees. However, unlike a Random Forest, the trees are constructed sequentially and place a higher “weight” on data points not well explained by prior trees. In addition to the number of trees, we also examined several learning rates for our 5 fold cross validation through grid search. The hyper-parameters tested were: # 𝑜𝑓 𝑡𝑟𝑒𝑒𝑠∶ [100,150,200,250,300,350,400,500,600] 𝑙𝑒𝑎𝑟𝑛𝑖𝑛𝑔 𝑟𝑎𝑡𝑒: [0.01,0.1,0.15]
 The resulting optimized parameters for this model were 150 trees and 0.1 (10%) learning rate. This produced an ROC-AUC of 0.7915 and a profit score of $543,229.
 
@@ -110,11 +116,25 @@ The resulting optimized parameters for this model were 150 trees and 0.1 (10%) l
 Certainly, a comparative study of model performance is essential to select the best-performing model. Please provide the performance summary table, and I'll be happy to assist you with the analysis and model selection based on the provided metrics.
 ![image](https://github.com/user-attachments/assets/0ce3433d-6ee8-4d16-8103-2b6b4ab9e112)
 
-Validating Class Threshold
+- Validating Class Threshold
 Finally, in assessing that we have selected the optimal threshold to maximize our primary scoring metric (profit), we calculated the profit across various thresholds using our final model. This confirmed that the threshold that yields the highest profit is the previously calculated value of 0.23076923.
+
 ![image](https://github.com/user-attachments/assets/9f26ba3f-a940-4d94-b885-87cea57b8cac)
 
 
+# Ethical Implications of Data-Driven Decision-Making in Credit Risk Assessment
+The analysis of predictive models for credit card default prediction highlights several important considerations in the context of equality, anti-discrimination, and ethics in data-driven decision-making. These considerations are crucial for ensuring that financial institutions not only optimize their operations but also uphold ethical standards and fairness.
+
+Equality and anti-discrimination have long been pivotal concerns in modern society. Historically, the spotlight was primarily on human decision makers, addressing questions about how to prevent humans from discriminating against one another. Discrimination, a subset of broader ethical considerations, was at the forefront of discussions regarding fair and ethical behavior in decision-making processes.
+To contextualize these concerns, it's important to note that many leading economies have implemented policies to combat discrimination in various sectors, including financial services. These decisions spark mixed reactions, with some viewing it as a triumph for gender equality, while others expressed concerns about its implications for business practices. Now, let's focus on the analysis conducted to see the implications for the debate on equality, anti-discrimination, and data-driven decision-making:
+1. Identification of Bias: The analyses conducted shed light on the potential presence of gender-based bias within the credit assessment model. These findings underscore the importance of vigilance in identifying and addressing biases that can inadvertently seep into data-driven decision-making processes.
+2. Inequality Awareness: The observed disparities between genders in credit predictions highlight the fact that data-driven algorithms, if not carefully designed and monitored, can perpetuate and even exacerbate existing inequalities.
+The data consistently demonstrates that male applicants exhibit higher default rates compared to female applicants, regardless of whether the "SEX" variable is included or excluded. This is statistically significant as it reflects a potential bias in credit decisions against males. Notably, the gender-based difference in default rates diminishes when the "SEX" variable is excluded from the model. This is statistically significant as it indicates that the inclusion of gender information influences the model's predictions, contributing to gender-based disparities.
+3.Fairness and Equity: The analyses underscore the broader debate on fairness and equity in data-driven decision-making. While algorithms are designed to make objective decisions, they can inadvertently perpetuate biases present in historical data. The statistical evidence confirms the existence of gender bias within the credit provision model, particularly when gender information is included. This poses
+ethical and legal challenges as it suggests that the model may inadvertently discriminate against certain
+genders, violating principles of anti-discrimination.
+
+The analyses underscore the significant societal impact of data-driven decisions, particularly in financial services. Biased credit assessments can affect access to financial resources, economic opportunities, and overall quality of life. Addressing bias in this context is not just an ethical concern but also a social imperative. It encourage a more nuanced examination of how multiple identity factors, such as gender, race, age, and others, interact within data-driven decision-making. This intersectionality highlights the need for more comprehensive anti-discrimination strategies. In conclusion, the analyses presented in this study offer insights that have direct and far-reaching implications for the ongoing debate on equality and anti-discrimination in data-driven decision-making. They emphasize the importance of proactive measures to identify and mitigate bias, transparency in algorithmic processes, adherence to legal frameworks, and a deep commitment to fairness and equity. Ultimately, the goal is to harness the power of data-driven decision-making while ensuring that it serves as a tool for promoting equality rather than perpetuating discrimination.
 
 
 
