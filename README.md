@@ -47,10 +47,10 @@ MVP Model Summary:
 ## Feature Engineering
 The feature engineering process is a critical component of this project, aimed at creating meaningful and informative features to improve model performance.
 
-- Handling Missing Data
+#### Handling Missing Data
 Before model development, we pre-cleaned the dataset to address missing values. We preserved '0' as a representation for missing data in the Education and Marriage fields, transforming them into categorical variables labeled as 'unknown' and later into dummy variables. This decision was made to ensure seamless integration into the modeling process without introducing complexities.
 
-- Feature Creation
+#### Feature Creation
 Feature creation is a key differentiator for our model, enhancing its predictive capabilities:
 
 1. Total Bill Amount Over 6 Months (TTL_BILL): Summing up bill amounts for the last six months to provide insights into financial commitment.
@@ -73,12 +73,12 @@ Credit Utilization Ratios (CREDIT_UTILIZATION1 to CREDIT_UTILIZATION6): Gauging 
 ![image](https://github.com/user-attachments/assets/035e19dc-9f0e-40c7-8bf7-5c383a6daa75)
 
 
-- Variable Transformation
+#### Variable Transformation
 Enhancements and transformations improve feature suitability:
 
-- Logarithm of Payment Amounts: Normalizing data and mitigating heteroscedasticity issues.
+#### Logarithm of Payment Amounts: Normalizing data and mitigating heteroscedasticity issues.
 Pay Category Squared: Capturing nonlinear patterns in payment behavior.
-- Categorical Encoding
+#### Categorical Encoding
 Adjustments align data types with business and technical requirements, ensuring effective modeling. Dummy variables were generated for all categorical variables, expanding the dataset to 135 variables, enhancing model insights and predictive power.
 
 ## Model Building and Assessment
